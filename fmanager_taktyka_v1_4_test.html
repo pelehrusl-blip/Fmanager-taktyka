@@ -1,0 +1,227 @@
+<!doctype html><html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Fmanager Тактика v1.4</title><style>
+:root{font-family:system-ui,-apple-system,sans-serif;color-scheme:dark;background:#101723;color:#f1f5fb}*{box-sizing:border-box}body{margin:0;padding:16px;max-width:850px;margin-inline:auto}h1{font-size:25px;margin:8px 0}h2{font-size:17px;margin:0 0 12px}.sub{color:#aebbd0;font-size:13px}section{background:#1b2636;border:1px solid #344357;border-radius:15px;padding:14px;margin:14px 0}label{display:block;font-size:13px;color:#cbd5e1;margin-bottom:5px}select,input,textarea,button{font:inherit}select,input,textarea{width:100%;background:#111b29;border:1px solid #4b6079;border-radius:9px;color:white;padding:10px;min-width:0}button{border:0;border-radius:10px;background:#3e70e5;color:white;font-weight:700;padding:12px;cursor:pointer}button.secondary{background:#34455d}button.danger{background:#873f47}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.full{grid-column:1/-1}.buttons{display:flex;gap:8px;flex-wrap:wrap}.buttons button{flex:1}.small{font-size:12px}.status{padding:10px;background:#101d2d;border-radius:9px;margin:10px 0;white-space:pre-wrap}.pitch{background:repeating-linear-gradient(0deg,#194b34 0 72px,#20573c 72px 144px);border:2px solid #9bbaa8;border-radius:12px;padding:14px 6px;display:flex;flex-direction:column;gap:18px;min-height:490px;justify-content:space-between}.line{display:flex;justify-content:space-around;gap:3px}.player{background:#0e2335dd;border:1px solid #7c9dbe;border-radius:9px;padding:8px 2px;text-align:center;min-width:0;flex:1;max-width:145px}.player strong{font-size:11px;display:block;overflow-wrap:anywhere}.player span{font-size:10px;color:#c1d2e5}.player em{display:block;font-size:11px;color:#a7f3d0;font-style:normal}.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.stat{background:#101d2d;padding:12px;border-radius:10px}.stat b{display:block;font-size:21px}.scroll{overflow:auto}table{width:100%;border-collapse:collapse;font-size:12px}td,th{padding:8px 5px;border-bottom:1px solid #3a4b61;text-align:left}td input{min-width:65px;padding:7px}td button{padding:7px}summary{cursor:pointer;font-weight:700}#editTable{min-width:760px}.hint{color:#e9c781;font-size:12px}.choices{display:grid;gap:8px;margin-bottom:12px}.choice{width:100%;text-align:left;background:#293c56;border:1px solid #526b89}.choice.active{border:2px solid #a7f3d0;background:#24554b}.availability{width:110px;padding:6px;font-size:12px}#results{display:none}#manual{display:none}@media(max-width:450px){body{padding:9px}.grid3{grid-template-columns:1fr 1fr}.player{padding:7px 1px}.player strong{font-size:10px}}
+a.importlink{display:inline-block;padding:12px 15px;background:#366de3;border-radius:9px;color:white;text-decoration:none;font-weight:700}#autoImport details{margin-top:12px}#autoImport summary{cursor:pointer}</style></head><body><h1>⚽ Fmanager Тактика</h1><div class="sub">by L1Nk • Підбір складу • 10 схем • 8 стилів • лідерство 550</div>
+<section><h2>1. Параметри підбору</h2><div class="grid"><div><label for="formation">Схема</label><select id="formation"></select></div><div><label for="style">Стиль</label><select id="style"></select></div><div><label for="lead">Лідерство</label><select id="lead"><option value="exact">Точно 550</option><option value="range">530–570</option></select></div><div><label for="tries">Глибина пошуку</label><select id="tries"><option value="25000">Швидкий</option><option value="150000" selected>Ретельний</option><option value="600000">Максимальний</option></select></div></div><p class="hint">Поки оцінюємо номінальну силу без штрафів. Пошук евристичний: результати не гарантують математичного максимуму. П’ять варіантів відрізняються силою та гравцями; кожен відповідає вибраним умовам.</p><button id="search" style="width:100%">🔎 Знайти 5 різних складів</button><div id="message" class="status">Завантажено тестовий склад зі скриншотів. Перевір дані та за потреби виправ.</div></section>
+<section id="results"><h2>2. Знайдені склади</h2><div id="lineupChoices" class="choices"></div><div id="metrics" class="stats"></div><p class="small" id="stylecheck"></p><div id="pitch" class="pitch"></div><p class="hint">Флангові штрафи та фактична ефективність поки не розраховуються.</p></section>
+<section id="autoImport"><h2>📲 Оновлення складу з Fmanager</h2><p class="sub">Без PDF і CSV. Один раз налаштуй закладку Chrome — потім імпортуй актуальний склад своєї команди.</p><div class="buttons"><a class="importlink" href="./fmanager_import_test.html">Відкрити попередній перегляд імпорту</a><button type="button" id="reloadSquad" class="secondary">↻ Підтягнути оновлений склад</button></div><p class="small" id="autoStatus">Після підтвердження складу на сторінці імпорту повернись сюди. Гравці також оновляться при поверненні у вкладку.</p><details><summary>⚙️ Налаштування для друзів (один раз)</summary><p class="small">1. Увійди у свій Fmanager у Chrome. 2. Створи окрему закладку «Імпорт Fmanager» і в її URL встав команду кнопкою нижче. 3. Відкрий сторінку складу, введи назву закладки в адресний рядок і вибери підказку зі зірочкою. 4. Перевір гравців та підтвердь імпорт.</p><button type="button" id="copyBookmarklet" class="secondary">📋 Скопіювати команду закладки</button><p class="small" id="copyStatus"></p></details></section><section><h2>Гравці <span id="count"></span></h2><p class="sub">Початкові дані перенесено зі скриншотів. Зміни зберігаються в цьому браузері на цьому пристрої.</p><div class="buttons"><button class="secondary" id="add">+ Гравець</button><button class="secondary" id="toggle">Редагувати список</button><button class="secondary" id="export">Експорт CSV</button></div><div id="manual"><div class="scroll"><table id="editTable"><thead><tr><th>Ім'я</th><th>Лінія</th><th>Сила</th><th>Лід.</th><th>Тех.</th><th>Груб.</th><th>Фланги</th><th>Станд.</th><th>Статус</th><th></th></tr></thead><tbody id="playersBody"></tbody></table></div><p class="small">Познач недоступних гравців (травма або червона картка). Вони не потраплятимуть у склади. Після редагування натисни «Зберегти зміни».</p><button id="save">Зберегти зміни</button></div><details style="margin-top:16px" open><summary>📥 Імпорт складу Fmanager — тестова версія</summary>
+<p class="small">Склад із сайту доступний після входу, тому просте посилання тут поки не зчитується. Скопіюй таблицю гравців із Fmanager і встав її нижче. Можна також вибрати збережений HTML-файл сторінки. Перед заміною обов'язково перевір попередній перегляд.</p>
+<label for="squadLink">Посилання на склад (для довідки, не завантажує дані)</label><input id="squadLink" type="url" placeholder="https://fmanager.com.ua/teams/.../squad/retro">
+<label for="fmanagerPaste" style="margin-top:10px">Скопійована таблиця (текст)</label><textarea id="fmanagerPaste" rows="6" placeholder="Встав сюди текст таблиці зі сторінки Fmanager"></textarea>
+<label for="fmanagerFile">Або HTML-файл збереженої сторінки</label><input id="fmanagerFile" type="file" accept=".html,.htm,text/html,text/plain,.txt">
+<div class="buttons" style="margin-top:10px"><button id="previewFmanager" type="button">Перевірити імпорт</button><button id="applyFmanager" type="button" disabled>Замінити склад перевіреними даними</button></div>
+<div id="importStatus" class="status" aria-live="polite">Поточний склад не зміниться, поки не підтвердиш імпорт.</div>
+<div class="scroll"><table id="importPreview" style="display:none;min-width:650px"><thead><tr><th>Ім'я</th><th>Поз.</th><th>Сила</th><th>Лід.</th><th>Тех.</th><th>Груб.</th><th>Фланги</th><th>Станд.</th></tr></thead><tbody id="importPreviewBody"></tbody></table></div>
+</details><details style="margin-top:16px"><summary>Імпорт / заміна складу з CSV</summary><p class="small">Формат: ім'я,позиція,сила,лідерство,техніка,грубість,фланги,стандарти (останню колонку можна пропустити). Позиція: G, D, M або F. Один гравець на рядок.</p><textarea id="csv" rows="5" placeholder="Ім'я,D,90,50,60,40,70"></textarea><button id="import">Замінити склад із CSV</button></details><button id="reset" class="danger" style="margin-top:12px">Відновити початкових гравців</button></section>
+<section><h2>Що вже працює</h2><p class="small">Вибір усіх 10 схем, усіх 8 стилів, підбір 11 гравців за лініями, контроль суми лідерства, обчислення стилю за 10 польовими, пошук до 5 складів різної сили з ротацією футболістів, виключення недоступних гравців, редагування та збереження гравців. Імпорт скопійованої таблиці в тестуванні; читання з авторизованої сторінки через закладку Chrome працює; штрафи — наступний етап.</p></section>
+<script>
+'use strict';
+// D=захист, M=півзахист, F=напад, G=воротар. Кожен масив — ряд на полі зліва направо.
+const formations={
+'3-2-5 (Double W)':[['F:Фланг','F:Центр','F:Фланг'],['M:Змішана','M:Змішана'],['M:Змішана','M:Змішана'],['D:Фланг','D:Центр','D:Фланг']],
+'3-4-3 (Ajax70)':[['F:Змішана','F:Змішана'],['M:Фланг','M:Фланг'],['M:Змішана','M:Центр','M:Змішана'],['D:Центр','D:Центр','D:Центр']],
+'3-5-2 (WingBack)':[['F:Змішана','F:Змішана'],['M:Фланг','M:Фланг'],['M:Змішана','M:Центр','M:Змішана'],['D:Центр','D:Центр','D:Центр']],
+'5-4-1 (Draw)':[['F:Центр'],['F:Фланг','F:Фланг'],['M:Центр','M:Центр'],['D:Фланг','D:Фланг'],['D:Центр','D:Центр','D:Центр']],
+'5-3-2 (Catenaccio)':[['F:Змішана','F:Змішана'],['M:Центр'],['M:Центр','M:Центр'],['D:Фланг','D:Фланг'],['D:Центр','D:Центр','D:Центр']],
+'4-2-3-1 (Plain)':[['F:Центр'],['F:Фланг','F:Фланг'],['M:Центр'],['M:Змішана','M:Змішана'],['D:Фланг','D:Центр','D:Центр','D:Фланг']],
+'4-3-2-1 (Ale)':[['F:Центр'],['M:Змішана','M:Змішана'],['M:Змішана','M:Центр','M:Змішана'],['D:Фланг','D:Центр','D:Центр','D:Фланг']],
+'4-2-4 (Brazil)':[['F:Змішана','F:Змішана'],['F:Фланг','F:Фланг'],['M:Центр','M:Центр'],['D:Фланг','D:Центр','D:Центр','D:Фланг']],
+'4-4-2 (Classic)':[['F:Змішана','F:Змішана'],['M:Фланг','M:Центр','M:Центр','M:Фланг'],['D:Фланг','D:Центр','D:Центр','D:Фланг']],
+'4-3-3 (Tiki Taka)':[['F:Змішана','F:Центр','F:Змішана'],['M:Центр','M:Центр','M:Центр'],['D:Фланг','D:Центр','D:Центр','D:Фланг']]
+};
+const styleNames=['Будь-який','Технічний','Грубий','Фланговий','Не технічний','Не грубий','Не фланговий','Пасивний','Активний'];
+const styleMap={'100':'Технічний','010':'Грубий','001':'Фланговий','011':'Не технічний','101':'Не грубий','110':'Не фланговий','000':'Пасивний','111':'Активний'};
+// Скриншоти: прізвище, позиція, сила, лідерство, техніка, грубість, фланги.
+const seed=[
+['Pavlo Isenko','G',92,40,27,68,70],['Oleksandr Mekmin','G',88,42,44,40,32],['Ivan Pakholiuk','G',88,78,29,26,42],['Patrick Pentz','G',71,56,79,73,51],
+['Jakub Kiwior','D',99,66,34,79,23],['Patrick Dorgu','D',98,36,34,64,79],['Ezri Konsa','D',99,48,45,47,32],['Martin Erlic','D',81,66,69,78,25],['Eric Dier','D',84,53,67,40,25],['Oleksiy Sych','D',83,62,37,20,55],['Matias Vina','D',79,38,24,50,54],['Yukhym Konoplia','D',100,31,48,40,69],['Oleksandr Romanchuk','D',91,33,35,66,25],['Volodymyr Vilvald','D',87,63,55,59,65],['Bogdan Milovanov','D',79,72,44,73,95],['Danyil Checher','D',64,75,63,33,70],
+['Dani Olmo','M',100,71,54,60,51],['Ryan Gauld','M',81,22,73,45,58],['Egor Nazaryna','M',90,73,67,20,38],['Taras Moroz','M',74,22,45,58,25],['Josh Cullen','M',83,72,59,78,44],['Denys Kuzyk','M',90,36,56,51,78],['Yegor Tverdokhlib','M',90,35,55,73,25],['Bogdan Lednev','M',85,40,73,55,32],['Volodymyr Shepelev','M',87,42,55,38,30],['Oleksandr Pikhalionok','M',96,49,43,58,36],
+['Dan Ndoye','F',94,77,62,79,75],['Mauro Icardi','F',72,95,68,31,19],['Edon Zhegrova','F',87,59,72,76,57],['Orri Oskarsson','F',90,58,27,35,25],['Promise David','F',87,51,28,53,22],['Folarin Balogun','F',99,24,72,54,43],['Chico Conceicao','F',94,43,37,41,81],['Savio','F',96,58,33,76,75],['Tymerlan Guseynov','F',92,31,40,74,33]
+].map((a,i)=>({id:i+1,name:a[0],pos:a[1],power:a[2],lead:a[3],tech:a[4],rough:a[5],wing:a[6],standard:0}));
+const $=id=>document.getElementById(id);let players;
+try{players=JSON.parse(localStorage.getItem('fmanager_players_v1'))||structuredClone(seed)}catch(e){players=JSON.parse(JSON.stringify(seed))}
+players=players.map(p=>({...p,standard:p.standard??0,available:p.available!==false}));
+const store=()=>{try{localStorage.setItem('fmanager_players_v1',JSON.stringify(players))}catch(e){$('message').textContent='Не вдалося зберегти дані в браузері.'}};
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+for(const name of Object.keys(formations))$('formation').add(new Option(name,name));for(const name of styleNames)$('style').add(new Option(name,name));$('formation').value='4-3-3 (Tiki Taka)';$('style').value='Грубий';
+function renderTable(){ $('count').textContent=`(${players.length})`;$('playersBody').innerHTML=players.map((p,i)=>`<tr data-i="${i}"><td><input data-k="name" value="${esc(p.name)}"></td><td><select data-k="pos">${['G','D','M','F'].map(x=>`<option ${p.pos===x?'selected':''}>${x}</option>`).join('')}</select></td>${['power','lead','tech','rough','wing','standard'].map(k=>`<td><input type="number" min="0" max="100" data-k="${k}" value="${p[k]??0}"></td>`).join('')}<td><select class="availability" data-k="available"><option value="true" ${p.available!==false?'selected':''}>✅ Доступний</option><option value="false" ${p.available===false?'selected':''}>⛔ Недоступний</option></select></td><td><button class="danger" data-del="${i}">×</button></td></tr>`).join('')}
+renderTable();
+$('toggle').onclick=()=>{$('manual').style.display=$('manual').style.display==='block'?'none':'block'};
+$('add').onclick=()=>{readEdits(false);players.push({id:Date.now(),name:'Новий гравець',pos:'M',power:50,lead:50,tech:50,rough:50,wing:50,standard:50,available:true});renderTable();$('manual').style.display='block'};
+function readEdits(notify=true){let next=[];for(const tr of $('playersBody').querySelectorAll('tr')){const old=players[Number(tr.dataset.i)];const obj={id:old?.id??Number(tr.dataset.i)+1};for(const el of tr.querySelectorAll('[data-k]'))obj[el.dataset.k]=el.dataset.k==='available'?el.value==='true':el.dataset.k==='name'||el.dataset.k==='pos'?el.value:Number(el.value);if(!obj.name.trim()||['power','lead','tech','rough','wing','standard'].some(k=>!Number.isInteger(obj[k])||obj[k]<0||obj[k]>100)){alert('Перевір ім’я та значення характеристик (цілі числа 0–100).');return false}next.push(obj)}players=next;store();if(notify){renderTable();$('message').textContent='Зміни збережено.'}return true}
+$('save').onclick=()=>readEdits();$('playersBody').onclick=e=>{if(e.target.dataset.del!==undefined){const i=Number(e.target.dataset.del);if(!readEdits(false))return;players.splice(i,1);store();renderTable()}};
+$('reset').onclick=()=>{if(confirm('Замінити поточних гравців початковим списком?')){players=JSON.parse(JSON.stringify(seed));store();renderTable()}};
+$('export').onclick=()=>{if(!readEdits(false))return;const csv=players.map(p=>[p.name,p.pos,p.power,p.lead,p.tech,p.rough,p.wing,p.standard??0].join(',')).join('\n');const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='fmanager-squad.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
+$('import').onclick=()=>{const lines=$('csv').value.trim().split(/\r?\n/).filter(Boolean);let next=[];for(const [i,line] of lines.entries()){const a=line.split(',').map(s=>s.trim());if((a.length!==7&&a.length!==8)||!['G','D','M','F'].includes(a[1])||a.slice(2).some(v=>v===''||!Number.isInteger(Number(v))||Number(v)<0||Number(v)>100)){alert('Помилка у рядку '+(i+1));return}next.push({id:i+1,name:a[0],pos:a[1],power:+a[2],lead:+a[3],tech:+a[4],rough:+a[5],wing:+a[6],standard:a.length===8?+a[7]:0,available:true})}if(!next.length)return;if(confirm('Замінити весь поточний склад?')){players=next;store();renderTable();$('message').textContent='Імпортовано '+next.length+' гравців.'}};
+const styleOf=(t,r,w)=>styleMap[`${+(t>=500)}${+(r>=500)}${+(w>=500)}`];
+const randomInt=n=>Math.floor(Math.random()*n);
+// Heuristic: each iteration draws a lineup from position groups, with randomized strength-biased sampling.
+function pick(pool,count,temperature){const a=pool.slice(),out=[];for(let j=0;j<count;j++){let sum=0;const weights=a.map(p=>{const v=Math.exp((p.power-65)/temperature);sum+=v;return v});let z=Math.random()*sum,k=0;while(k<weights.length-1&&(z-=weights[k])>0)k++;out.push(a.splice(k,1)[0])}return out}
+let foundLineups=[];
+function search(){
+ if($('manual').style.display==='block'&&!readEdits(false))return;
+ const formation=$('formation').value,desired=$('style').value,exact=$('lead').value==='exact',n=+$('tries').value;
+ const rows=formations[formation];
+ const slots=rows.flat().map(s=>({pos:s.split(':')[0],role:s.split(':')[1]})).concat([{pos:'G',role:'Воротар'}]);
+ const groups={};for(const pos of ['G','D','M','F'])groups[pos]=players.filter(p=>p.pos===pos&&p.available!==false);
+ const counts={G:1,D:0,M:0,F:0};slots.slice(0,-1).forEach(s=>counts[s.pos]++);
+ for(const pos of Object.keys(counts))if(groups[pos].length<counts[pos]){$('message').textContent=`Недостатньо доступних гравців ${pos}: потрібно ${counts[pos]}, є ${groups[pos].length}.`;$('results').style.display='none';return}
+ $('message').textContent='Шукаю комбінації…';$('search').disabled=true;
+ setTimeout(()=>{
+   let matched=0;const strongest=[],weakest=[],sample=[];const seen=new Set();
+   const addSorted=(arr,candidate,descending,limit)=>{
+     arr.push(candidate);arr.sort((a,b)=>descending?b.power-a.power:a.power-b.power);
+     if(arr.length>limit)arr.pop();
+   };
+   for(let i=0;i<n;i++){
+    const selected={};for(const pos of ['G','D','M','F'])selected[pos]=pick(groups[pos],counts[pos],i%5===0?7:i%3===0?15:28);
+    const field=[...selected.D,...selected.M,...selected.F];let lead=selected.G[0].lead,tech=0,rough=0,wing=0,power=selected.G[0].power;
+    for(const p of field){lead+=p.lead;tech+=p.tech;rough+=p.rough;wing+=p.wing;power+=p.power}
+    if(exact?lead!==550:lead<530||lead>570)continue;
+    const style=styleOf(tech,rough,wing);if(desired!=='Будь-який'&&style!==desired)continue;
+    matched++;
+    const key=[...selected.G,...field].map(p=>p.id).sort((a,b)=>String(a).localeCompare(String(b))).join('|');
+    if(seen.has(key))continue;
+    seen.add(key);
+    const candidate={selected,lead,tech,rough,wing,power,style,rows,slots,key,ids:new Set([...selected.G,...field].map(p=>p.id))};
+    if(strongest.length<220||power>strongest[strongest.length-1].power)addSorted(strongest,candidate,true,220);
+    if(weakest.length<220||power<weakest[weakest.length-1].power)addSorted(weakest,candidate,false,220);
+    // Reservoir sampling preserves middle-strength options without retaining every match.
+    if(sample.length<350)sample.push(candidate);
+    else if(Math.random()<350/matched)sample[randomInt(350)]=candidate;
+   }
+   const candidates=[...new Map([...strongest,...sample,...weakest].map(c=>[c.key,c])).values()].sort((a,b)=>b.power-a.power);
+   const names=['Найсильніший','Сильний','Збалансований','Ротаційний','Резервний'];
+   const top=[];
+   const overlap=(a,b)=>{let n=0;for(const id of a.ids)if(b.ids.has(id))n++;return n};
+   for(let rank=0;rank<5;rank++){
+     const remaining=candidates.filter(c=>!top.some(x=>x.key===c.key));
+     if(!remaining.length)break;
+     let chosen=null;
+     // Prefer at least three changes relative to every previously chosen lineup.
+     for(const maxShared of [8,9,10,11]){
+       const eligible=remaining.filter(c=>top.every(t=>overlap(c,t)<=maxShared));
+       if(!eligible.length)continue;
+       if(rank===0)chosen=eligible[0];
+       else if(rank===1)chosen=eligible[0];
+       else if(rank===2)chosen=eligible[Math.floor((eligible.length-1)*0.35)];
+       else if(rank===3)chosen=eligible[Math.floor((eligible.length-1)*0.70)];
+       else chosen=eligible[eligible.length-1];
+       break;
+     }
+     if(!chosen)break;
+     chosen.label=names[rank];top.push(chosen);
+   }
+   foundLineups=top;
+   if(!top.length){$('results').style.display='none';$('message').textContent=`За ${n.toLocaleString('uk-UA')} спроб не знайдено складу, який виконує всі умови. Це не доводить, що його не існує. Спробуй «Максимальний» пошук або діапазон 530–570.`}
+   else{$('results').style.display='block';renderChoices(0);$('message').textContent=`Знайдено ${matched.toLocaleString('uk-UA')} відповідних спроб за ${n.toLocaleString('uk-UA')} перевірок. Показано ${top.length} варіантів із різною силою та ротацією. Усі відповідають вибраним умовам. Якщо відповідних комбінацій мало, варіантів може бути менше п’яти.`;$('results').scrollIntoView({behavior:'smooth',block:'start'})}
+  $('search').disabled=false;
+ },30);
+}
+function renderChoices(active){
+ $('lineupChoices').innerHTML=foundLineups.map((b,i)=>`<button type="button" class="choice ${i===active?'active':''}" data-lineup="${i}">№${i+1} ${esc(b.label||'Варіант')} · ${esc($('formation').value)} · ${esc(b.style)} · Лідерство ${b.lead} · Сила ${b.power}</button>`).join('');
+ show(foundLineups[active]);
+}
+$('lineupChoices').onclick=e=>{const button=e.target.closest('[data-lineup]');if(button)renderChoices(Number(button.dataset.lineup))};
+function show(b){
+ $('metrics').innerHTML=[['Сила',b.power],['Лідерство',b.lead],['Техніка',b.tech],['Грубість',b.rough],['Фланги',b.wing],['Стиль',b.style]].map(([k,v])=>`<div class="stat"><span class="small">${k}</span><b>${esc(v)}</b></div>`).join('');
+ $('stylecheck').textContent=`Техніка ${b.tech>=500?'+':'−'} · Грубість ${b.rough>=500?'+':'−'} · Фланги ${b.wing>=500?'+':'−'} (без воротаря)`;
+ const pools={};for(const pos of ['D','M','F','G'])pools[pos]=b.selected[pos].slice();
+ const renderRow=row=>`<div class="line">${row.map(s=>{const [pos,role]=s.split(':'),p=pools[pos].shift();return `<div class="player"><strong>${esc(p.name)}</strong><em>Сила ${p.power}</em><span>${esc(role)}</span></div>`}).join('')}</div>`;
+ $('pitch').innerHTML=b.rows.map(renderRow).join('')+renderRow(['G:Воротар']);
+}
+$('search').onclick=search;
+
+// Безпечний імпорт: тільки підтверджені рядки з 6 числовими характеристиками.
+let pendingFmanager=[];
+const cleanCell=x=>String(x||'').replace(/\u00a0/g,' ').replace(/\s+/g,' ').trim();
+function parseFmanagerText(raw){
+ const positions={'легенда':'F','воротарі':'G','воротари':'G','захисники':'D','півзахисники':'M','форварди':'F','нападники':'F'};
+ const result=[],errors=[];let pos=null;
+ for(const [idx,line] of raw.split(/\r?\n/).entries()){
+  const cells=line.split(/\t|\s{2,}/).map(cleanCell).filter(Boolean);
+  const lineClean=cleanCell(line).toLowerCase();
+  const group=Object.keys(positions).find(k=>lineClean===k||lineClean.startsWith(k+' '));
+  if(group && (cells.length<=3||lineClean.includes('сила'))) {pos=positions[group];continue;}
+  if(!pos||cells.length<7)continue;
+  // Таблиця Fmanager: ім'я, сила, зріст, грубість, лідерство, техніка, стандарти, фланги.
+  // У скопійованих рядках можуть бути номер і прапорець на початку.
+  const nums=cells.map((x,i)=>({i,n:Number(x)})).filter(x=>/^\d+$/.test(cells[x.i]));
+  if(nums.length<7)continue;
+  const v=nums.slice(-7).map(x=>x.n);
+  if(v.slice(0,1).concat(v.slice(2)).some(n=>n<0||n>100))continue;
+  const nameCells=cells.slice(0,nums[nums.length-7].i).filter(x=>!/^#?\d+$/.test(x)&&!/^\p{Regional_Indicator}{2}$/u.test(x));
+  const name=cleanCell(nameCells.join(' ')).replace(/^[^\p{L}]+/u,'');
+  if(!name||!/[\p{L}]/u.test(name))continue;
+  result.push({id:result.length+1,name,pos,power:v[0],rough:v[2],lead:v[3],tech:v[4],standard:v[5],wing:v[6],available:true});
+ }
+ return {result,errors};
+}
+function parseFmanagerHtml(html){
+ const doc=new DOMParser().parseFromString(html,'text/html');
+ for(const el of doc.querySelectorAll('script,style,noscript,svg'))el.remove();
+ const rows=[];
+ // Спроба зберегти межі клітинок і заголовків у HTML-таблиці.
+ for(const tr of doc.querySelectorAll('tr')){
+  const cells=[...tr.querySelectorAll('th,td')].map(x=>cleanCell(x.textContent));
+  if(cells.length)rows.push(cells.join('\t'));
+ }
+ const txt=rows.join('\n');
+ return parseFmanagerText(txt||doc.body.innerText||doc.body.textContent||'');
+}
+$('previewFmanager').onclick=async()=>{
+ pendingFmanager=[];$('applyFmanager').disabled=true;$('importPreview').style.display='none';
+ try{
+  const file=$('fmanagerFile').files[0],paste=$('fmanagerPaste').value.trim();
+  const raw=file?await file.text():paste;
+  if(!raw){$('importStatus').textContent='Встав текст таблиці або вибери файл HTML.';return}
+  const parsed=/<!doctype|<html|<table|<tr[ >]/i.test(raw)?parseFmanagerHtml(raw):parseFmanagerText(raw);
+  const found=parsed.result;
+  if(!found.length){$('importStatus').textContent='Не вдалося надійно розпізнати гравців. Поточний склад не змінено. Надішли приклад скопійованого тексту таблиці, щоб ми налаштували формат.';return}
+  const names=new Set(found.map(p=>p.name.toLowerCase()));
+  if(names.size!==found.length){$('importStatus').textContent='Виявлено дублікати імен. Імпорт заблоковано для перевірки.';return}
+  pendingFmanager=found;
+  $('importPreviewBody').innerHTML=found.map(p=>`<tr><td>${esc(p.name)}</td><td>${p.pos}</td><td>${p.power}</td><td>${p.lead}</td><td>${p.tech}</td><td>${p.rough}</td><td>${p.wing}</td><td>${p.standard}</td></tr>`).join('');
+  $('importPreview').style.display='table';$('applyFmanager').disabled=false;
+  $('importStatus').textContent=`Розпізнано ${found.length} гравців. Перевір імена, позиції та числа. Якщо когось бракує, НЕ підтверджуй імпорт.`;
+ }catch(e){$('importStatus').textContent='Помилка читання файлу: '+e.message}
+};
+$('applyFmanager').onclick=()=>{
+ if(!pendingFmanager.length)return;
+ if(!confirm(`Замінити поточний склад (${players.length}) на ${pendingFmanager.length} розпізнаних гравців? Всі будуть доступними.`))return;
+ players=pendingFmanager.map(p=>({...p,available:true}));store();renderTable();foundLineups=[];$('results').style.display='none';
+ $('message').textContent=`Імпортовано ${players.length} гравців. Перевір характеристики у таблиці.`;
+ $('importStatus').textContent='Склад оновлено. Всі гравці доступні, доки ти не зміниш статус вручну.';
+ pendingFmanager=[];$('applyFmanager').disabled=true;
+};
+const BOOKMARKLET="javascript:(()=>{try{if(location.hostname!=='fmanager.com.ua'&&!location.hostname.endsWith('.fmanager.com.ua'))throw Error('Відкрий сторінку складу Fmanager');let t=document.body.innerText;let a=t.split(/\\n/).map(x=>x.trim()).filter(Boolean),pos='',players=[],groups={'Воротарі':'G','Захисники':'D','Півзахисники':'M','Форварди':'F'};for(let i=0;i<a.length;i++){let s=a[i];if(/Легенда\\s*\\(\\s*Форвард\\s*\\)/i.test(s)){pos='F';continue}if(groups[s]){pos=groups[s];continue}if(!pos||!/^[\\p{L}][\\p{L}\\p{M} .’'\\-©]+$/u.test(s)||s.length>55||/^(Грубість|Лідерство|Техніка|Стандарти|Фланги|Сила|Зріст|Контракт|Обміни|Podillya)$/i.test(s))continue;let power=Number(a[i+1]);if(!Number.isInteger(power)||power<1||power>100)continue;let j=i+2;if(/^(X\\d+|[—–-])$/i.test(a[j]||''))j++;let vals=a.slice(j,j+6).map(Number);if(vals.length!==6||vals.some((v,k)=>!Number.isInteger(v)||v<0||(k===5?v>250:v>100)))continue;let name=s.replace(/\\s*©\\s*$/,'').trim();if(players.some(p=>p.name===name))continue;players.push({name,pos,power,rough:vals[0],lead:vals[1],tech:vals[2],standard:vals[3],wing:vals[4]});i=j+5}let expected=Number((t.match(/Всього\\s*(\\d+)/i)||[])[1]);if(players.length<11||expected&&players.length!==expected)throw Error('Розпізнано '+players.length+' із '+(expected||'?')+' гравців. Склад не передано.');let data={version:1,url:location.href,players};location.href='https://pelehrusl-blip.github.io/Fmanager-taktyka/fmanager_import_test.html#squad='+encodeURIComponent(JSON.stringify(data))}catch(e){alert('Імпорт: '+e.message)}})()";
+
+// Імпорт з окремої сторінки GitHub Pages використовує той самий ключ localStorage.
+let lastSquadSnapshot=localStorage.getItem('fmanager_players_v1');
+function reloadImportedSquad(force=false){
+  const current=localStorage.getItem('fmanager_players_v1');
+  if(!current||(!force&&current===lastSquadSnapshot))return;
+  try{
+    const arr=JSON.parse(current);
+    if(!Array.isArray(arr)||arr.length<11||arr.length>150)throw Error('Невірна кількість');
+    const seen=new Set();
+    for(const p of arr){
+      if(!p.name||seen.has(p.name.toLowerCase())||!['G','D','M','F'].includes(p.pos)||['power','rough','lead','tech','standard','wing'].some(k=>!Number.isInteger(p[k])||p[k]<0||p[k]>100))throw Error('Некоректні дані');
+      seen.add(p.name.toLowerCase());
+    }
+    players=arr.map(p=>({...p,available:p.available!==false}));
+    lastSquadSnapshot=current;
+    renderTable();
+    foundLineups=[];
+    $('results').style.display='none';
+    $('autoStatus').textContent='✅ Завантажено '+players.length+' футболістів. Можна підбирати склади.';
+  }catch(e){$('autoStatus').textContent='⚠️ Не вдалося прочитати оновлений склад: '+e.message;}
+}
+$('reloadSquad').onclick=()=>reloadImportedSquad(true);
+window.addEventListener('focus',()=>reloadImportedSquad());
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)reloadImportedSquad()});
+$('copyBookmarklet').onclick=async()=>{
+ const cmd=BOOKMARKLET;
+ try{await navigator.clipboard.writeText(cmd);$('copyStatus').textContent='Команду скопійовано. Встав її у поле URL нової закладки Chrome.'}
+ catch(e){$('copyStatus').textContent='Chrome не дозволив копіювання. Скористайся кнопкою копіювання команди в чаті.'}
+};
+</script></body></html>
